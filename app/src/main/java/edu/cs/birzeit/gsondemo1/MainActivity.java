@@ -5,45 +5,58 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
-
+    public static final String DATA = "DATA";
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
+    private TextView txtResults;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupSharedPrefs();
+        txtResults = findViewById(R.id.txtResults);
+    }
+
+    private void setupSharedPrefs() {
+         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+         editor = prefs.edit();
+
     }
 
     public void btnSaveOnClick(View view) {
-        Book[] books = new Book[2];
+        Book[] books = new Book[3];
         books[0] = new Book("Java Core", "John");
         books[1] = new Book("C# in a Nutshell", "Mark");
+        books[2] = new Book("Professional Android", "Yang");
 
-       // Book book = new Book("Professional C#", "Samer");
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = prefs.edit();
         Gson gson = new Gson();
         String booksString = gson.toJson(books);
 
-        editor.putString("123", booksString);
+        editor.putString(DATA, booksString);
         editor.commit();
-        Toast.makeText(this, "Data Saved:\n" + booksString,
-                Toast.LENGTH_SHORT).show();
 
+        txtResults.setText(booksString);
 
     }
 
     public void btnLoadOnClick(View view) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Gson gson = new Gson();
-        String str = prefs.getString("123", "");
-        Book[] books = gson.fromJson(str, Book[].class);
 
-        Toast.makeText(this, "number of books" + books.length
-                , Toast.LENGTH_SHORT).show();
+        Gson gson = new Gson();
+        String str = prefs.getString(DATA, "");
+        if(!str.equals("")) {
+            Book[] books = gson.fromJson(str, Book[].class);
+
+            txtResults.setText("number of books:  " + books.length);
+        }
+        else{
+            txtResults.setText("No data found");
+        }
     }
 }
